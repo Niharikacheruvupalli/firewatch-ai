@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIREWATCH AI — Satellite-Derived Active Fire Triage Dashboard</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'><path d='M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z'/></svg>" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              950: '#070B19',
+              900: '#0A0F1D',
+              850: '#0F172A',
+              800: '#1E293B',
+              700: '#334155'
+            },
+            fire: {
+              red: '#EF4444',
+              orange: '#F97316',
+              amber: '#F59E0B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Leaflet MarkerCluster CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- PapaParse CSV Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="bg-[#070B19] text-slate-100 min-h-screen flex flex-col antialiased">
+  <!-- Desktop Sidebar Container (fixed left) -->
+  <aside id="sidebar-container"></aside>
+
+  <!-- Mobile Top Bar -->
+  <header class="md:hidden h-14 bg-[#0A0F1D] border-b border-[#1E293B] px-4 flex items-center justify-between z-30 sticky top-0">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center">
+        <i data-lucide="flame" class="w-5 h-5 text-white"></i>
+      </div>
+      <span class="font-bold text-sm tracking-wide text-white">FIREWATCH <span class="text-orange-500 font-extrabold">AI</span></span>
+    </div>
+    <button id="mobile-menu-btn" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- Mobile Dropdown Drawer -->
+  <div id="mobile-drawer" class="hidden md:hidden bg-[#0A0F1D] border-b border-[#1E293B] p-3 space-y-1 z-30 sticky top-14 shadow-2xl">
+    <button onclick="window.firewatchApp.navigateTo('overview')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="layout-dashboard" class="w-4 h-4 text-orange-500"></i>
+      <span>Overview</span>
+    </button>
+    <button onclick="window.firewatchApp.navigateTo('map')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="map" class="w-4 h-4 text-orange-500"></i>
+      <span>Active Fire Map</span>
+    </button>
+    <button onclick="window.firewatchApp.navigateTo('observations')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="table-properties" class="w-4 h-4 text-orange-500"></i>
+      <span>Observations Table</span>
+    </button>
+    <button onclick="window.firewatchApp.navigateTo('import')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="upload-cloud" class="w-4 h-4 text-orange-500"></i>
+      <span>Data Import & Audit</span>
+    </button>
+    <button onclick="window.firewatchApp.navigateTo('methodology')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="sliders" class="w-4 h-4 text-orange-500"></i>
+      <span>Ranking Weights</span>
+    </button>
+    <button onclick="window.firewatchApp.navigateTo('about')" class="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2">
+      <i data-lucide="shield-alert" class="w-4 h-4 text-orange-500"></i>
+      <span>About & Safety</span>
+    </button>
+  </div>
+
+  <!-- Main View Area (offset by desktop sidebar width) -->
+  <div class="flex-1 md:pl-64 flex flex-col min-h-screen transition-all duration-200">
+    <!-- Top Universal App Header -->
+    <header class="h-16 bg-[#0A0F1D]/80 backdrop-blur border-b border-[#1E293B] px-6 flex items-center justify-between sticky top-0 z-20">
+      <div class="flex items-center space-x-3">
+        <h1 id="header-view-title" class="text-sm md:text-base font-semibold text-white tracking-wide">
+          Environmental Intelligence Overview
+        </h1>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="tests/test_runner.html" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 font-sans" title="Run Automated Validator & Ranking Tests">
+          <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="text-xs">Run Tests</span>
+        </a>
+
+        <div class="hidden sm:flex items-center space-x-2 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>FIRMS FEED ACTIVE</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
+      <div id="main-content-view">
+        <!-- Rendered by FirewatchApp -->
+        <div class="flex items-center justify-center py-20 text-slate-500">
+          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500 mr-3"></div>
+          <span>Loading satellite telemetry pipeline...</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Disclaimer Strip -->
+    <footer class="bg-[#070B14] border-t border-[#1E293B] py-3 px-6 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <p>
+          <strong class="text-slate-400">FIREWATCH AI</strong> is an environmental intelligence analyst tool. 
+          Satellite detections are thermal radiance anomalies, not ground-truth confirmation of wildfires.
+        </p>
+        <p class="font-mono text-[11px] text-slate-400">
+          Data Source: NASA FIRMS (VIIRS &amp; MODIS)
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Master Application Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

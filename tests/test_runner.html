@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIREWATCH AI — Automated Test Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body class="bg-[#070B19] text-slate-100 p-8 font-sans">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center font-bold text-white">
+          FW
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white">FIREWATCH AI Engine Verification</h1>
+          <p class="text-xs text-slate-400">Automated unit test suite for NASA FIRMS validation, spatial clustering &amp; ranking formulas</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="run-btn" class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 font-semibold text-xs text-white shadow transition">
+          Re-run All Tests
+        </button>
+        <a href="../index.html" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 transition">
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Box -->
+    <div id="summary-card" class="grid grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl bg-[#0F172A] border border-[#1E293B]">
+        <span class="text-xs text-slate-400 uppercase font-mono">Total Tests</span>
+        <div id="stat-total" class="text-2xl font-bold font-mono text-white mt-1">-</div>
+      </div>
+      <div class="p-4 rounded-xl bg-[#0F172A] border border-[#1E293B]">
+        <span class="text-xs text-emerald-400 uppercase font-mono">Passed</span>
+        <div id="stat-passed" class="text-2xl font-bold font-mono text-emerald-400 mt-1">-</div>
+      </div>
+      <div class="p-4 rounded-xl bg-[#0F172A] border border-[#1E293B]">
+        <span class="text-xs text-red-400 uppercase font-mono">Failed</span>
+        <div id="stat-failed" class="text-2xl font-bold font-mono text-slate-400 mt-1">-</div>
+      </div>
+    </div>
+
+    <!-- Test Results List -->
+    <div class="p-6 rounded-xl bg-[#0F172A] border border-[#1E293B] shadow-xl">
+      <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4 font-mono">Test Execution Log</h3>
+      <div id="results-list" class="space-y-2.5 font-mono text-xs">
+        <div class="text-slate-500 py-4 text-center">Initializing test runner...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { TestRunner, registerTestSuite } from './test_engine.js';
+
+    async function execute() {
+      const runner = new TestRunner();
+      registerTestSuite(runner);
+
+      const listEl = document.getElementById('results-list');
+      listEl.innerHTML = '<div class="text-slate-400 py-4 text-center">Running automated verification suite...</div>';
+
+      const report = await runner.runAll();
+
+      document.getElementById('stat-total').innerText = report.total;
+      document.getElementById('stat-passed').innerText = report.passed;
+      
+      const failedEl = document.getElementById('stat-failed');
+      failedEl.innerText = report.failed;
+      if (report.failed > 0) {
+        failedEl.className = 'text-2xl font-bold font-mono text-red-400 mt-1';
+      } else {
+        failedEl.className = 'text-2xl font-bold font-mono text-slate-500 mt-1';
+      }
+
+      listEl.innerHTML = report.results.map(r => `
+        <div class="p-3 rounded-lg border ${
+          r.status === 'PASS' 
+            ? 'bg-emerald-950/20 border-emerald-900/40 text-emerald-300' 
+            : 'bg-red-950/40 border-red-900/60 text-red-300'
+        } flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${r.status === 'PASS' ? 'bg-emerald-900 text-emerald-200' : 'bg-red-900 text-red-200'}">
+                ${r.status}
+              </span>
+              <span class="font-semibold text-slate-200">${r.name}</span>
+            </div>
+            ${r.error ? `<div class="mt-2 text-xs text-red-400 font-sans pl-2 border-l-2 border-red-500">${r.error}</div>` : ''}
+          </div>
+          <span class="text-slate-500 text-[10px] flex-shrink-0">${r.duration}ms</span>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('run-btn').onclick = execute;
+    execute();
+  </script>
+</body>
+</html>
