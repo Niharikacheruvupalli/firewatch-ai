@@ -1,0 +1,181 @@
+/* FIREWATCH AI - Core Styling System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg-deep-navy: #070B19;
+  --bg-card: #0F172A;
+  --bg-card-hover: #1E293B;
+  --border-subtle: #1E293B;
+  --border-focus: #334155;
+  --accent-fire-red: #EF4444;
+  --accent-fire-orange: #F97316;
+  --accent-fire-amber: #F59E0B;
+  --accent-emerald: #10B981;
+  --accent-cyan: #06B6D4;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-deep-navy);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+code, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B1120;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Priority Badges */
+.badge-priority-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.badge-priority-medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+.badge-priority-low {
+  background: rgba(148, 163, 184, 0.15);
+  color: #CBD5E1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Custom Leaflet Dark Mode & Cluster Styling */
+.leaflet-container {
+  background-color: #0B1120 !important;
+  font-family: inherit;
+}
+
+/* Custom Marker Pins */
+.fire-marker-pin {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease-out;
+}
+.fire-marker-pin:hover {
+  transform: scale(1.25);
+  z-index: 1000 !important;
+}
+
+.fire-marker-pin.high {
+  background: #EF4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.8);
+}
+.fire-marker-pin.high::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #EF4444;
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.fire-marker-pin.medium {
+  background: #F59E0B;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.fire-marker-pin.low {
+  background: #64748B;
+  box-shadow: 0 0 6px rgba(100, 116, 139, 0.4);
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Custom Cluster Markers */
+.marker-cluster-fire {
+  background-clip: padding-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #FFFFFF;
+}
+.marker-cluster-fire-small {
+  background-color: rgba(245, 158, 11, 0.6);
+  border: 2px solid #F59E0B;
+}
+.marker-cluster-fire-medium {
+  background-color: rgba(249, 115, 22, 0.7);
+  border: 2px solid #F97316;
+}
+.marker-cluster-fire-large {
+  background-color: rgba(239, 68, 68, 0.8);
+  border: 2px solid #EF4444;
+}
+
+/* Dark Popup Styling */
+.leaflet-popup-content-wrapper {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7) !important;
+  padding: 4px !important;
+}
+.leaflet-popup-tip {
+  background: #0F172A !important;
+  border: 1px solid #334155 !important;
+}
+.leaflet-popup-close-button {
+  color: #94A3B8 !important;
+  padding: 6px !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #FFFFFF !important;
+}
+
+/* Transitions */
+.sidebar-transition {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease-in-out;
+}
+
+/* Range input accent */
+input[type=range] {
+  accent-color: #F97316;
+}
